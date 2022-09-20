@@ -1,0 +1,13 @@
+Package: vbsgen
+Title: VBScript Generator
+Version: 0.1-0
+Authors@R: 
+    person("Michael", "Koohafkan", , "michael.koohafkan@gmail.com", role = c("aut", "cre"))
+Description: Programmatically generate VBScript files to call VBA macros.
+Imports:
+    utils,
+    glue (>= 1.6)
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.1

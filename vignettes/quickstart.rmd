@@ -1,0 +1,150 @@
+---
+author: "Michael Koohafkan"
+title: "Quickstart with vbsgen"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Quickstart} 
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The `vbsgen` package provides an approach to calling VBA Macros from R.
+At its core, the package provides methods for programatically
+constructing VBScript files that can be called from the shell, e.g.,
+via `system2()`.
+
+```{r}
+library(vbsgen)
+```
+
+Scripts are generated from a skeleton script with placeholders for
+macro-specific information. The package includes a default skeleton
+script for basic usage, but custom skeleton scripts can be used
+instead:
+
+```{r}
+default_skeleton(print = TRUE)
+```
+
+The pacakge provides two methods for interfacing with VBA macros.
+To illustrate these methods, we'll use the included macro-enabled Excel
+workbook "data_importer.xlsm". This file contains a single macro
+"importData" which copies data from a csv file to a sheet and cell
+specified by the user and saves the result to a new Excel file. For
+reference, the macro VBA code is included below:
+
+```vb
+Sub importData(inputFile As String, sheetName As String, tableRange As String, outputFile As String)
+    'declarations
+    Dim wsheet As Worksheet
+    Set wsheet = ActiveWorkbook.Sheets(sheetName)
+    'read data from file
+    With wsheet.QueryTables.Add(Connection:="TEXT;" & inputFile, Destination:=wsheet.Range(tableRange))
+        .TextFileParseType = xlDelimited
+        .TextFileCommaDelimiter = True
+        .RefreshOnFileOpen = False
+        .Refresh BackgroundQuery:=False
+        .Refresh
+    End With
+    'remove connection when finished
+    Dim Conn As WorkbookConnection
+    For Each Conn In ThisWorkbook.Connections
+        If InStr(1, inputFile, Conn.Name, 1) > 0 Then
+            Conn.Delete
+        End If
+    Next Conn
+    ActiveWorkbook.SaveAs (outputFile)
+End Sub
+```
+
+The macro accepts
+four arguments:
+1. The path to the csv file containing data
+2. The target sheet in "data_importer.xlsm" to write data to
+3. The target cell defining the top-left corner of the data table to be
+   written.
+4. The path of the new Excel file to be saved.
+
+For this example, we'll also create some dummy data to import.
+
+```{r}
+# get path to data_importer.xlsm
+example_file = system.file("examples", "data_importer.xlsm",
+  package = "vbsgen")
+
+# create dummy data
+set.seed(42)
+dummy_file = tempfile(fileext = ".csv")
+write.csv(data.frame(x = seq_len(10), y = rnorm(10)), dummy_file,
+  row.names = FALSE)
+```
+
+## 1. Generate a script file from a list of arguments
+
+This method produces a VBS script that calls the specified macro. All
+arguments to the macro must be passed as named R arguments with default
+values in order to perform the correct type casting in the resulting
+VBScript.
+
+```{r}
+myscript = macro_script(example_file, "importData",
+  inputFile = NA_character_, targetSheet = NA_character_,
+  targetRange = NA_character_, outputFile = NA_character_)
+
+myscript
+```
+
+This script can then be written to a file and run via `system2()`:
+
+```{r}
+script_file = tempfile(fileext = ".vbs")
+writeLines(myscript, script_file)
+
+#specify output file
+output_file = tempfile(fileext = ".xlsm")
+system2("cscript", args = c(script_file, dummy_file, "second_sheet",
+  "B2", output_file))
+```
+
+When you open the resulting Excel file, you should see the dummy data
+written to sheet "second_sheet" starting at cell B2.
+
+```{r eval = FALSE}
+shell.exec(output_file)
+```
+
+## 2. Generate an R function that calls the script file
+
+This method wraps the functionality of the previous method into a
+callable R function. 
+
+```{r}
+macro_fun = macro_function(example_file, "importData",
+  dataFile = NA_character_, targetSheet = NA_character_,
+  targetRange = NA_character_, outputFile = NA_character_)
+```
+
+VBScripts created by `macro_function()` are stored in a temporary
+directory managed by the package. The VBScript file names match the
+specified macro names. 
+
+```{r}
+script_dir()
+list.files(script_dir())
+```
+
+Using `macro_function()` allows macros to be called like any other R function.
+
+```{r}
+output_file2 = tempfile(fileext = ".xlsm")
+
+macro_fun(dummy_file, "first_sheet", "A1", output_file2)
+```
+
+
+When you open the resulting Excel file, you should see the dummy data
+written to sheet "first_sheet" starting at cell A1.
+
+```{r eval = FALSE}
+shell.exec(output_file2)
+```
