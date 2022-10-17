@@ -148,7 +148,7 @@ list.files(script_dir())
 Using `macro_function()` allows macros to be called like any other R function.
 
 ```{r}
-output_file2 = tempfile(fileext = ".xlsm")
+output_file2 = normalizePath(tempfile(fileext = ".xlsm"), mustWork = FALSE)
 
 macro_fun(dummy_file, "first_sheet", "A1", output_file2)
 ```
