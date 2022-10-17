@@ -119,6 +119,8 @@ macro_script = function(macro_file, macro_name, ...,
 #' @export
 macro_function = function(macro_file, macro_name, ...,
   .skeleton = default_skeleton()) {
+  # check path to file
+  macro_file = normalizePath(macro_file, mustWork = TRUE)
   # generate script
   script_file = normalizePath(file.path(script_dir(),
     glue("{macro_name}.vbs")), mustWork = FALSE)
