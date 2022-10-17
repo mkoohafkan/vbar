@@ -105,7 +105,7 @@ myscript
 
 This script can then be written to a file and run via `system2()`:
 
-```{r}
+```{r eval = FALSE}
 # write script to file
 script_file = normalizePath(tempfile(fileext = ".vbs"), mustWork = FALSE)
 writeLines(myscript, script_file)
@@ -147,7 +147,7 @@ list.files(script_dir())
 
 Using `macro_function()` allows macros to be called like any other R function.
 
-```{r}
+```{r eval = FALSE}
 output_file2 = normalizePath(tempfile(fileext = ".xlsm"), mustWork = FALSE)
 
 macro_fun(dummy_file, "first_sheet", "A1", output_file2)
