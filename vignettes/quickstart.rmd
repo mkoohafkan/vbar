@@ -26,8 +26,8 @@ instead:
 default_skeleton(print = TRUE)
 ```
 
-The pacakge provides two methods for interfacing with VBA macros.
-To illustrate these methods, we'll use the included macro-enabled Excel
+The package provides two methods for interfacing with VBA macros.
+To illustrate these methods, we'll use a macro-enabled Excel
 workbook "data_importer.xlsm". This file contains a single macro
 "importData" which copies data from a csv file to a sheet and cell
 specified by the user and saves the result to a new Excel file. For
@@ -57,6 +57,19 @@ Sub importData(inputFile As String, sheetName As String, tableRange As String, o
 End Sub
 ```
 
+This macro file is included in the package. **Note:** that if you
+have macros disabled by default on your machine, you may need to
+re-sign the Excel file.
+
+```{r}
+# get path to data_importer.xlsm
+example_file = normalizePath(system.file("examples", "data_importer.xlsm",
+  package = "vbsgen"), mustWork = TRUE)
+
+# navigate to the file and re-sign if necessary:
+print(example_file)
+```
+
 The macro accepts
 four arguments:
 1. The path to the csv file containing data
@@ -68,13 +81,9 @@ four arguments:
 For this example, we'll also create some dummy data to import.
 
 ```{r}
-# get path to data_importer.xlsm
-example_file = system.file("examples", "data_importer.xlsm",
-  package = "vbsgen")
-
 # create dummy data
 set.seed(42)
-dummy_file = tempfile(fileext = ".csv")
+dummy_file = normalizePath(tempfile(fileext = ".csv"), mustWork = FALSE)
 write.csv(data.frame(x = seq_len(10), y = rnorm(10)), dummy_file,
   row.names = FALSE)
 ```
@@ -97,11 +106,14 @@ myscript
 This script can then be written to a file and run via `system2()`:
 
 ```{r}
-script_file = tempfile(fileext = ".vbs")
+# write script to file
+script_file = normalizePath(tempfile(fileext = ".vbs"), mustWork = FALSE)
 writeLines(myscript, script_file)
 
-#specify output file
-output_file = tempfile(fileext = ".xlsm")
+#specify macro output file
+output_file = normalizePath(tempfile(fileext = ".xlsm"), mustWork = FALSE)
+
+# run macro via VBScript
 system2("cscript", args = c(script_file, dummy_file, "second_sheet",
   "B2", output_file))
 ```
@@ -148,3 +160,27 @@ written to sheet "first_sheet" starting at cell A1.
 ```{r eval = FALSE}
 shell.exec(output_file2)
 ```
+
+# Common Problems
+
+VBScript is is fairly sensitive to syntax and type errors, and has only
+rudimentary support for error handling. Below is a list of common
+causes of errors in VBScripts:
+
+1. Macros are not enabled in the file: Unsurprisingly, attempting
+   to run macros from a file that has macros disabled will result in an
+   error. Some methods of copying Macro-Enabled files will remove
+   digital signatures from the files, disabling macros.
+2. Mixed formatting in file paths: While VBScript can handle file paths
+   that use either `/` or `\`, it cannot handle file paths that use
+   both. To avoid this problem, wrap any file paths provided as macro
+   arguments in `normalizePath()` to ensure consistent formatting. Note
+   that `macro_script()` and `macro_function()` will normalize the path
+   to the macro file internally.
+3. VBA errors: VBScript will not return errors thrown by the macro
+   code. Depending on how the macro is written, the error may result in
+   a message box and suspend the program, rather than closing it.
+   Unfortunately, I do not know of a way to return vlues from a VBA
+   macro back to VBScript. Setting `Application.DisplayAlerts = False`
+   in your VBA macros will prevent the application from prompting the
+   user to save the file when an error is encountered.
