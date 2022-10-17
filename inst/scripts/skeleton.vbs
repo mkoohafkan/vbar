@@ -11,11 +11,24 @@ Set args = wScript.Arguments
 Dim macroApp
 Dim macroFile
 
-set macroApp = createObject("{macro_application}.Application")
+Set macroApp = createObject("{macro_application}.Application")
 macroApp.visible = False
-set macroFile = macroApp.{collection_type}.Open("{macro_file}")
+Set macroFile = macroApp.{collection_type}.Open("{macro_file}")
+
+If Err.Number <> 0 Then
+  WScript.Echo "VBScript Error: " & Err.Description
+  macroApp.Quit
+  wscript.quit
+End If
 
 macroApp.Run "{macro_name}", {macro_args}
+
+
+If Err.Number <> 0 Then
+  WScript.Echo "VBScript Error: " & Err.Description
+  macroApp.Quit
+  wscript.quit
+End If
 
 macroFile.Close
 macroApp.Quit
