@@ -23,7 +23,6 @@ End If
 
 macroApp.Run "{macro_name}", {macro_args}
 
-
 If Err.Number <> 0 Then
   WScript.Echo "VBScript Error: " & Err.Description
   macroApp.Quit

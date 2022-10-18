@@ -165,22 +165,26 @@ shell.exec(output_file2)
 
 VBScript is is fairly sensitive to syntax and type errors, and has only
 rudimentary support for error handling. Below is a list of common
-causes of errors in VBScripts:
+problems in VBScripts:
 
-1. Macros are not enabled in the file: Unsurprisingly, attempting
+1. **Macros are not enabled in the file**. Unsurprisingly, attempting
    to run macros from a file that has macros disabled will result in an
    error. Some methods of copying Macro-Enabled files will remove
    digital signatures from the files, disabling macros.
-2. Mixed formatting in file paths: While VBScript can handle file paths
+2. **Mixed formatting in file paths**. While VBScript can handle file paths
    that use either `/` or `\`, it cannot handle file paths that use
    both. To avoid this problem, wrap any file paths provided as macro
    arguments in `normalizePath()` to ensure consistent formatting. Note
    that `macro_script()` and `macro_function()` will normalize the path
    to the macro file internally.
-3. VBA errors: VBScript will not return errors thrown by the macro
+3. **VBA errors**. VBScript will not return errors thrown by the macro
    code. Depending on how the macro is written, the error may result in
-   a message box and suspend the program, rather than closing it.
-   Unfortunately, I do not know of a way to return vlues from a VBA
-   macro back to VBScript. Setting `Application.DisplayAlerts = False`
-   in your VBA macros will prevent the application from prompting the
-   user to save the file when an error is encountered.
+   an interactive dialog box, which suspend the program rather than
+   closing it. Setting `Application.DisplayAlerts = False` in your VBA
+   macros will prevent the application from prompting the user to save
+   the file when an error is encountered, but errors must be handled in
+   the VBA macro in order to completely prevent interactive dialogs and
+   avoid VBScripts from hanging indefinitely. Unfortunately, I do not
+   know of a way to return values from a VBA macro back to VBScript so
+   the best-case scenario will be that the VBScript returns an
+   "unknown error" message. 
