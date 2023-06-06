@@ -1,9 +1,9 @@
-Package: vbsgen
-Title: VBScript Generator
+Package: vbar
+Title: Scaffolding for VBA Macros
 Version: 0.1-0
 Authors@R: 
     person("Michael", "Koohafkan", , "michael.koohafkan@gmail.com", role = c("aut", "cre"))
-Description: Programmatically generate VBScript files to call VBA macros.
+Description: Programmatically generate R function interfaces to VBA macros.
 Imports:
     utils,
     glue (>= 1.6)

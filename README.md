@@ -1,3 +1,3 @@
-# vbsgen
+# vbar
 
-Programatically generate VBScripts for calling VBA Macros.
+Programmatically generate R function interfaces to VBA macros.

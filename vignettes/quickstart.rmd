@@ -1,6 +1,6 @@
 ---
 author: "Michael Koohafkan"
-title: "Quickstart with vbsgen"
+title: "Quickstart with vbar"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Quickstart} 
@@ -8,13 +8,13 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-The `vbsgen` package provides an approach to calling VBA Macros from R.
+The `vbar` package provides an approach to calling VBA Macros from R.
 At its core, the package provides methods for programatically
 constructing VBScript files that can be called from the shell, e.g.,
 via `system2()`.
 
 ```{r}
-library(vbsgen)
+library(vbar)
 ```
 
 Scripts are generated from a skeleton script with placeholders for
@@ -64,7 +64,7 @@ re-sign the Excel file.
 ```{r}
 # get path to data_importer.xlsm
 example_file = normalizePath(system.file("examples", "data_importer.xlsm",
-  package = "vbsgen"), mustWork = TRUE)
+  package = "vbar"), mustWork = TRUE)
 
 # navigate to the file and re-sign if necessary:
 print(example_file)

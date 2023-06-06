@@ -32,7 +32,7 @@ Generate an R function that acts as an interface to a VBA macro.
 }
 \examples{
 example_file = system.file("examples", "data_importer.xlsm",
-  package = "vbsgen")
+  package = "vbar")
 macro_function(example_file, "importData",
   dataFile = NA_character_, targetSheet = NA_character_,
   targetRange = NA_character_, outputFile = NA_character_)

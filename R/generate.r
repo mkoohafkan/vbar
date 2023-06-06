@@ -57,7 +57,7 @@ default_skeleton = function(print = FALSE) {
 #'
 #' @examples
 #' example_file = system.file("examples", "data_importer.xlsm",
-#'   package = "vbsgen")
+#'   package = "vbar")
 #' macro_script(example_file, "importData",
 #'   inputFile = NA_character_, targetSheet = NA_character_,
 #'   targetRange = NA_character_, outputFile = NA_character_)
@@ -110,7 +110,7 @@ macro_script = function(macro_file, macro_name, ...,
 #'
 #' @examples
 #' example_file = system.file("examples", "data_importer.xlsm",
-#'   package = "vbsgen")
+#'   package = "vbar")
 #' macro_function(example_file, "importData",
 #'   dataFile = NA_character_, targetSheet = NA_character_,
 #'   targetRange = NA_character_, outputFile = NA_character_)
