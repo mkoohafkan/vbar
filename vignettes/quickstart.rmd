@@ -13,7 +13,8 @@ At its core, the package provides methods for programatically
 constructing VBScript files that can be called from the shell, e.g.,
 via `system2()`.
 
-```{r}
+
+```r
 library(vbar)
 ```
 
@@ -22,8 +23,49 @@ macro-specific information. The package includes a default skeleton
 script for basic usage, but custom skeleton scripts can be used
 instead:
 
-```{r}
+
+```r
 default_skeleton(print = TRUE)
+```
+
+```
+## Option Explicit
+## On Error Resume Next
+## 
+## Dim args
+## Set args = wScript.Arguments
+## 
+## {dim_args}
+## 
+## {assign_args}
+## 
+## Dim macroApp
+## Dim macroFile
+## 
+## Set macroApp = createObject("{macro_application}.Application")
+## macroApp.visible = False
+## Set macroFile = macroApp.{collection_type}.Open("{macro_file}")
+## 
+## If Err.Number <> 0 Then
+##   WScript.Echo "VBScript Error: " & Err.Description
+##   macroApp.Quit
+##   wscript.quit
+## End If
+## 
+## macroApp.Run "{macro_name}", {macro_args}
+## 
+## If Err.Number <> 0 Then
+##   WScript.Echo "VBScript Error: " & Err.Description
+##   macroApp.Quit
+##   wscript.quit
+## End If
+## 
+## macroFile.Close
+## macroApp.Quit
+```
+
+```
+## [1] "C:/LocalWorkspace/g2encmck/Repositories/vbar/inst/scripts/skeleton.vbs"
 ```
 
 The package provides two methods for interfacing with VBA macros.
@@ -61,13 +103,18 @@ This macro file is included in the package. **Note:** that if you
 have macros disabled by default on your machine, you may need to
 re-sign the Excel file.
 
-```{r}
+
+```r
 # get path to data_importer.xlsm
 example_file = normalizePath(system.file("examples", "data_importer.xlsm",
   package = "vbar"), mustWork = TRUE)
 
 # navigate to the file and re-sign if necessary:
 print(example_file)
+```
+
+```
+## [1] "C:\\LocalWorkspace\\g2encmck\\Repositories\\vbar\\inst\\examples\\data_importer.xlsm"
 ```
 
 The macro accepts
@@ -80,7 +127,8 @@ four arguments:
 
 For this example, we'll also create some dummy data to import.
 
-```{r}
+
+```r
 # create dummy data
 set.seed(42)
 dummy_file = normalizePath(tempfile(fileext = ".csv"), mustWork = FALSE)
@@ -95,7 +143,8 @@ arguments to the macro must be passed as named R arguments with default
 values in order to perform the correct type casting in the resulting
 VBScript.
 
-```{r}
+
+```r
 myscript = macro_script(example_file, "importData",
   inputFile = character(), targetSheet = character(),
   targetRange = character(), outputFile = character())
@@ -103,9 +152,52 @@ myscript = macro_script(example_file, "importData",
 myscript
 ```
 
+```
+## Option Explicit
+## On Error Resume Next
+## 
+## Dim args
+## Set args = wScript.Arguments
+## 
+## Dim inputFile
+## Dim targetSheet
+## Dim targetRange
+## Dim outputFile
+## 
+## inputFile = args(0)
+## targetSheet = args(1)
+## targetRange = args(2)
+## outputFile = args(3)
+## 
+## Dim macroApp
+## Dim macroFile
+## 
+## Set macroApp = createObject("Excel.Application")
+## macroApp.visible = False
+## Set macroFile = macroApp.Workbooks.Open("C:\LocalWorkspace\g2encmck\Repositories\vbar\inst\examples\data_importer.xlsm")
+## 
+## If Err.Number <> 0 Then
+##   WScript.Echo "VBScript Error: " & Err.Description
+##   macroApp.Quit
+##   wscript.quit
+## End If
+## 
+## macroApp.Run "importData", CStr(inputFile), CStr(targetSheet), CStr(targetRange), CStr(outputFile)
+## 
+## If Err.Number <> 0 Then
+##   WScript.Echo "VBScript Error: " & Err.Description
+##   macroApp.Quit
+##   wscript.quit
+## End If
+## 
+## macroFile.Close
+## macroApp.Quit
+```
+
 This script can then be written to a file and run via `system2()`:
 
-```{r eval = FALSE}
+
+```r
 # write script to file
 script_file = normalizePath(tempfile(fileext = ".vbs"), mustWork = FALSE)
 writeLines(myscript, script_file)
@@ -121,7 +213,8 @@ system2("cscript", args = c(script_file, dummy_file, "second_sheet",
 When you open the resulting Excel file, you should see the dummy data
 written to sheet "second_sheet" starting at cell B2.
 
-```{r eval = FALSE}
+
+```r
 shell.exec(output_file)
 ```
 
@@ -130,7 +223,8 @@ shell.exec(output_file)
 This method wraps the functionality of the previous method into a
 callable R function. 
 
-```{r}
+
+```r
 macro_fun = macro_function(example_file, "importData",
   dataFile = character(), targetSheet = character(),
   targetRange = character(), outputFile = character())
@@ -140,14 +234,27 @@ VBScripts created by `macro_function()` are stored in a temporary
 directory managed by the package. The VBScript file names match the
 specified macro names. 
 
-```{r}
+
+```r
 script_dir()
+```
+
+```
+## [1] "C:\\Temp\\3\\Rtmpy0iEMM\\vbar52806b866a5f"
+```
+
+```r
 list.files(script_dir())
+```
+
+```
+## [1] "importData.vbs"
 ```
 
 Using `macro_function()` allows macros to be called like any other R function.
 
-```{r eval = FALSE}
+
+```r
 output_file2 = normalizePath(tempfile(fileext = ".xlsm"), mustWork = FALSE)
 
 macro_fun(dummy_file, "first_sheet", "A1", output_file2)
@@ -157,7 +264,8 @@ macro_fun(dummy_file, "first_sheet", "A1", output_file2)
 When you open the resulting Excel file, you should see the dummy data
 written to sheet "first_sheet" starting at cell A1.
 
-```{r eval = FALSE}
+
+```r
 shell.exec(output_file2)
 ```
 
