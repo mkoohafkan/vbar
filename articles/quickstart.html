@@ -153,9 +153,9 @@ VBA code is included below:</p>
 <span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">Next </span>Conn</span>
 <span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    ActiveWorkbook.SaveAs (outputFile)</span>
 <span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="kw">End Sub</span></span></code></pre></div>
-<p>This macro file is included in the package. <strong>Note:</strong>
-that if you have macros disabled by default on your machine, you may
-need to re-sign the Excel file.</p>
+<p>This macro file is included in the package. Note that if you unsigned
+macros are disabled from running on your machine, you may need to <a href="Digitally%20sign%20your%20VBA%20macro%20project%20https://support.microsoft.com/en-au/office/digitally-sign-your-vba-macro-project-956e9cc8-bbf6-4365-8bfa-98505ecd1c01" class="external-link">self-sign
+the Excel file</a>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># get path to data_importer.xlsm</span></span>
 <span><span class="va">example_file</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/normalizePath.html" class="external-link">normalizePath</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"examples"</span>, <span class="st">"data_importer.xlsm"</span>,</span>
@@ -164,10 +164,14 @@ need to re-sign the Excel file.</p>
 <span><span class="co"># navigate to the file and re-sign if necessary:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">example_file</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "C:\\LocalWorkspace\\g2encmck\\Repositories\\vbar\\inst\\examples\\data_importer.xlsm"</span></span></code></pre>
-<p>The macro accepts four arguments: 1. The path to the csv file
-containing data 2. The target sheet in “data_importer.xlsm” to write
-data to 3. The target cell defining the top-left corner of the data
-table to be written. 4. The path of the new Excel file to be saved.</p>
+<p>The macro accepts four arguments:</p>
+<ol style="list-style-type: decimal">
+<li>The path to the csv file containing data.</li>
+<li>The target sheet in “data_importer.xlsm” to write data to.</li>
+<li>The target cell defining the top-left corner of the data table to be
+written.</li>
+<li>The path of the new Excel file to be saved.</li>
+</ol>
 <p>For this example, we’ll also create some dummy data to import.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># create dummy data</span></span>
@@ -259,7 +263,7 @@ temporary directory managed by the package. The VBScript file names
 match the specified macro names.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/script_dir.html">script_dir</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "C:\\Temp\\3\\Rtmpy0iEMM\\vbar52806b866a5f"</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "C:\\Temp\\3\\RtmpgbJN6H\\vbar709817c85de7"</span></span></code></pre>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="../reference/script_dir.html">script_dir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "importData.vbs"</span></span></code></pre>
