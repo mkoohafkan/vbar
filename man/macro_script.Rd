@@ -31,10 +31,12 @@ A character string containing VBScript text.
 Build a VBS script that calls the macro specified macro.
 }
 \examples{
+\dontrun{
 example_file = system.file("examples", "data_importer.xlsm",
   package = "vbar")
 macro_script(example_file, "importData",
   inputFile = NA_character_, targetSheet = NA_character_,
   targetRange = NA_character_, outputFile = NA_character_)
+}
 
 }
