@@ -30,13 +30,77 @@ script_dir = function() {
 #'
 #' @export
 default_skeleton = function(print = FALSE) {
-  skeleton_path =   system.file("scripts/skeleton.vbs",
+  skeleton_path = system.file("scripts/skeleton.vbs",
     package = packageName(), mustWork = TRUE)
   if (print) {
     writeLines(readLines(skeleton_path))
   }
   skeleton_path
 }
+
+
+#' Get VBS Casting Function
+#'
+#' Identify the VBS casting function to use for an R object.
+#'
+#' @param arg An R primitive.
+#' @return The VBS casting function to use.
+#'
+#' @importFrom glue glue
+#' @keywords internal
+arg_spec = function(arg) {
+  if (is.na(arg)) {
+    stop("argument is NA.")
+  }
+  switch(class(arg),
+    "numeric" = "CDbl",
+    "integer" = "CInt",
+    "character" = "CStr",
+    "logical" = "CBool",
+    stop(glue("No known VBS conversion for type \"{class(arg)}\"."))
+  )
+}
+
+
+#' Get Application
+#'
+#' Identify the macro application.
+#'
+#' @param filename A filename.
+#' @return The Application.
+#'
+#' @importFrom glue glue
+#' @keywords internal
+application_spec = function(filename) {
+  if (grepl("\\.xls[a-z]*$", tolower(filename))) {
+    "Excel"
+  } else if (grepl("\\.doc[a-z]*$", tolower(filename))) {
+    "Word"
+  } else {
+    stop(glue("Could not identify application from filename \"{filename}\"."))
+  }
+}
+
+
+#' Get Collection Type
+#'
+#' Identify the collection type.
+#'
+#' @param application An application, e.g. "Word" or "Excel".
+#' @return The collection type.
+#'
+#' @importFrom glue glue
+#' @keywords internal
+collection_spec = function(application) {
+  if (application == "Excel") {
+    "Workbooks"
+  } else if (application == "Word") {
+    "Documents"
+  } else {
+    stop(glue("Did not recognize application \"{application}\"."))
+  }
+}
+
 
 #' Build Macro Script
 #'
@@ -56,48 +120,44 @@ default_skeleton = function(print = FALSE) {
 #' @return A character string containing VBScript text.
 #'
 #' @examples
+#' \dontrun{
 #' example_file = system.file("examples", "data_importer.xlsm",
 #'   package = "vbar")
 #' macro_script(example_file, "importData",
 #'   inputFile = NA_character_, targetSheet = NA_character_,
 #'   targetRange = NA_character_, outputFile = NA_character_)
+#' }
 #'
-#' @importFrom glue glue
+#' @importFrom glue glue glue_data
 #' @export
 macro_script = function(macro_file, macro_name, ...,
   .skeleton = default_skeleton()) {
   # check path to file
   macro_file = normalizePath(macro_file, mustWork = TRUE)
+  stopifnot(length(macro_file) == 1L)
+  stopifnot(length(macro_name) == 1L)
   # argument handling
   arg_list = list(...)
   arg_names = names(arg_list)
+  # VBS command-line arguments are zero-indexed
   arg_positions = seq_along(arg_list) - 1L
-  arg_types = unlist(lapply(arg_list, class))
-  # script argument handling
-  dim_args = paste(glue("Dim {arg_names}"), collapse = "\n")
-  assign_args_list = glue("{arg_names} = args({arg_positions})")
-  convert_args = ifelse(
-    arg_types == "numeric", glue("CDbl({arg_names})"), ifelse(
-    arg_types == "integer", glue("CInt({arg_names})"), ifelse(
-    arg_types == "character", glue("CStr({arg_names})"), arg_names
-  )))
-  assign_args = paste(assign_args_list, collapse = "\n")
-  macro_args = paste(convert_args, collapse = ", ")
+  arg_prefixes = unlist(lapply(arg_list, arg_spec))
+  convert_args = glue("{arg_prefixes}({arg_names})")
   # identify application type
-  macro_application = ifelse(
-    grepl("\\.xls[a-z]*$", tolower(macro_file)), "Excel", ifelse(
-    grepl("\\.doc[a-z]*$", tolower(macro_file)),"Word", NA_character_
-  ))
-  if (is.na(macro_application)) {
-    stop("Could not identify application from file name.")
-  }
-  collection_type = switch(macro_application,
-    "Excel" = "Workbooks",
-    "Word" = "Documents"
-  )
+  macro_application = application_spec(macro_file)
+  collection_type = collection_spec(macro_application)
   # write vsb script
-  vbs_skeleton = paste(readLines(.skeleton), collapse= "\n")
-  glue(vbs_skeleton)
+  vbs_skeleton = paste(readLines(.skeleton), collapse = "\n")
+  glue_data(vbs_skeleton, .x = list(
+    dim_args = paste(glue("Dim {arg_names}"), collapse = "\n"),
+    assign_args = paste(glue("{arg_names} = args({arg_positions})"),
+      collapse = "\n"),
+    macro_application = macro_application,
+    collection_type = collection_type,
+    macro_file = macro_file,
+    macro_name = macro_name,
+    macro_args = paste(convert_args, collapse = ", ")
+  ))
 }
 
 
@@ -109,12 +169,13 @@ macro_script = function(macro_file, macro_name, ...,
 #' @return An R function that calls a VBScript via `system2()`.
 #'
 #' @examples
+#' \dontrun{
 #' example_file = system.file("examples", "data_importer.xlsm",
 #'   package = "vbar")
 #' macro_function(example_file, "importData",
 #'   dataFile = NA_character_, targetSheet = NA_character_,
 #'   targetRange = NA_character_, outputFile = NA_character_)
-#'
+#' }
 #' @importFrom glue glue
 #' @export
 macro_function = function(macro_file, macro_name, ...,
@@ -138,7 +199,7 @@ macro_function = function(macro_file, macro_name, ...,
     {{macro_name}} = function({{paste(arg_names, collapse = \", \")}}) {
       system2(\"cscript\", args = c({{arg_string}}))
     }
-  ", .open = "{{", .close = "}}")  
+  ", .open = "{{", .close = "}}")
   fun = eval(parse(text = function_code))
   fun
 }
