@@ -1,10 +1,13 @@
 test_that("macro script generation", {
 
-  tf = normalizePath(tempfile(fileext = ".xlsx"), mustWork = FALSE)
+  tf = tempfile(fileext = ".xlsx")
   file.create(tf)
   on.exit(unlink(tf), add = TRUE)
+  tf = normalizePath(tf, mustWork = TRUE)
+
   result = macro_script(tf, "fake_macro", a = 1L, b = 2.0, c = "three")
   result = gsub(tf, "testfile.xlsx", result, fixed = TRUE)
+
   expect_snapshot(result)
 
 })

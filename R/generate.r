@@ -133,7 +133,7 @@ collection_spec = function(application) {
 macro_script = function(macro_file, macro_name, ...,
   .skeleton = default_skeleton()) {
   # check path to file
-  macro_file = normalizePath(macro_file, mustWork = TRUE)
+  macro_file = normalizePath(macro_file, winslash = "\\", mustWork = TRUE)
   stopifnot(length(macro_file) == 1L)
   stopifnot(length(macro_name) == 1L)
   # argument handling
