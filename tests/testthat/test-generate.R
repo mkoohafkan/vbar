@@ -36,3 +36,35 @@ test_that("macro script helpers", {
   expect_error(collection_spec(NULL))
 
 })
+
+
+test_that("macro function", {
+
+  skip_if_no_vba()
+  skip_if_not(requireNamespace("readxl"))
+
+  test_data = data.frame(x = seq_len(10) * 1.0, y = seq_len(10) * 2.0)
+  dummy_file = normalizePath(tempfile(fileext = ".csv"), mustWork = FALSE)
+  write.csv(test_data, dummy_file, row.names = FALSE)
+
+  example_file = normalizePath(
+    system.file("examples", "data_importer.xlsm", package = "vbar"),
+    mustWork = TRUE
+  )
+
+  macro_fun = macro_function(example_file, "importData",
+    dataFile = character(), targetSheet = character(),
+    targetRange = character(), outputFile = character())
+
+  output_file = normalizePath(tempfile(fileext = ".xlsm"), mustWork = FALSE)
+
+  expect_identical(
+    macro_fun(dummy_file, "first_sheet", "A1", output_file),
+    0L
+  )
+  expect_identical(
+    as.data.frame(readxl::read_excel(output_file, "first_sheet")),
+    test_data
+  )
+
+})

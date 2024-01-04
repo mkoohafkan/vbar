@@ -49,7 +49,7 @@ default_skeleton = function(print = FALSE) {
 #' @importFrom glue glue
 #' @keywords internal
 arg_spec = function(arg) {
-  if (is.na(arg)) {
+  if (isTRUE(is.na(arg))) {
     stop("argument is NA.")
   }
   switch(class(arg),
