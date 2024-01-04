@@ -10,6 +10,7 @@ Imports:
 Suggests: 
     knitr,
     rmarkdown,
+    readxl (>= 1.3),
     testthat (>= 3.0.0)
 License: GPL (>= 3)
 Encoding: UTF-8
