@@ -60,7 +60,7 @@ End Sub
 This macro file is included in the package. Note that if you
 unsigned macros are disabled from running on your machine, you
 may need to
-[self-sign the Excel file](Digitally sign your VBA macro project https://support.microsoft.com/en-au/office/digitally-sign-your-vba-macro-project-956e9cc8-bbf6-4365-8bfa-98505ecd1c01).
+[self-sign the Excel file](https://support.microsoft.com/en-au/office/digitally-sign-your-vba-macro-project-956e9cc8-bbf6-4365-8bfa-98505ecd1c01).
 
 ```{r}
 # get path to data_importer.xlsm
